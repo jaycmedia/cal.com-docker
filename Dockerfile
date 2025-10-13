@@ -41,6 +41,7 @@ COPY calcom/packages ./packages
 COPY calcom/tests ./tests
 
 RUN yarn config set httpTimeout 1200000
+RUN npm install -g turbo
 RUN npx turbo prune --scope=@calcom/web --scope=@calcom/trpc --docker
 RUN yarn install
 # Build and make embed servable from web/public/embed folder
