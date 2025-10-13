@@ -38,7 +38,7 @@ services:
         DATABASE_URL: ${DATABASE_URL}
         DATABASE_DIRECT_URL: ${DATABASE_URL}
         CSP_POLICY: ${CSP_POLICY}
-        DISABLE_CONFLICT_CHECKING: true
+        DISABLE_CONFLICT_CHECKING: ${DISABLE_CONFLICT_CHECKING}
     restart: always
     networks:
       - stack
