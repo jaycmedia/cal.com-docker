@@ -20,36 +20,31 @@ jobs:
       contents: write
 
     steps:
-      - name: Checkout this repo WITH submodules
+      - name: Checkout (no submodules)
         uses: actions/checkout@v4
         with:
-          submodules: recursive
+          fetch-depth: 0
 
-      - name: Compute branch name
-        id: meta
+      - name: Vendor calcom by cloning fork
         run: |
-          ts="$(date +'%Y%m%d-%H%M%S')"
-          suffix="${{ github.event.inputs.branch_suffix }}"
-          [ -z "$suffix" ] && suffix="$ts"
-          echo "branch=release-${suffix}" >> "$GITHUB_OUTPUT"
-
-      - name: Vendor submodule
-        run: |
-          set -e
-          BR="${{ steps.meta.outputs.branch }}"
+          set -euo pipefail
+          BR="release-$(date +'%Y%m%d-%H%M%S')"
 
           git config user.email "actions@github.com"
           git config user.name  "actions-user"
 
-          # new release branch
           git checkout -b "$BR"
 
-          # break submodule link & keep files
+          # nuke submodule wiring and contents
           rm -f .gitmodules || true
-          rm -rf calcom/.git
+          rm -rf calcom || true
+
+          # clone YOUR fork (or upstream) into calcom/
+          git clone --depth 1 https://github.com/jaycmedia/cal.com.git calcom
+          # or: git clone --depth 1 https://github.com/calcom/cal.com.git calcom
 
           git add -A
-          git commit -m "Vendor calcom submodule for Portainer deploy" || true
+          git commit -m "Vendor calcom for Portainer deploy"
           git push origin "$BR"
 
       - name: Maybe trigger Portainer redeploy
