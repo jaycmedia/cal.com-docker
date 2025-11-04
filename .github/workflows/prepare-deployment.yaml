@@ -1,0 +1,57 @@
+name: Prepare Deployment Branch
+
+on:
+  workflow_dispatch:
+    inputs:
+      branch_suffix:
+        description: 'Suffix for release branch'
+        required: false
+        default: ''
+
+      trigger_portainer:
+        description: 'POST to Portainer webhook? true/false'
+        required: false
+        default: 'false'
+
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout this repo WITH submodules
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Compute branch name
+        id: meta
+        run: |
+          ts="$(date +'%Y%m%d-%H%M%S')"
+          suffix="${{ github.event.inputs.branch_suffix }}"
+          [ -z "$suffix" ] && suffix="$ts"
+          echo "branch=release-${suffix}" >> "$GITHUB_OUTPUT"
+
+      - name: Vendor submodule
+        run: |
+          set -e
+          BR="${{ steps.meta.outputs.branch }}"
+
+          git config user.email "actions@github.com"
+          git config user.name  "actions-user"
+
+          # new release branch
+          git checkout -b "$BR"
+
+          # break submodule link & keep files
+          rm -f .gitmodules || true
+          rm -rf calcom/.git
+
+          git add -A
+          git commit -m "Vendor calcom submodule for Portainer deploy" || true
+          git push origin "$BR"
+
+      - name: Maybe trigger Portainer redeploy
+        if: ${{ github.event.inputs.trigger_portainer == 'true' }}
+        run: curl -fsSL -X POST "${{ secrets.PORTAINER_WEBHOOK_URL }}"
