@@ -1,4 +1,0 @@
-[submodule "calcom"]
-	path = calcom
-	url = git@github.com:jaycmedia/cal.com.git
-	branch = main
