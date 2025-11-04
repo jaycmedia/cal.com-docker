@@ -1,0 +1,47 @@
+name: Prepare Deployment Branch
+
+on:
+  workflow_dispatch:
+    inputs:
+      trigger_portainer:
+        description: 'POST to Portainer webhook? true/false'
+        required: false
+        default: 'false'
+
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout (no submodules)
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Vendor calcom by cloning fork
+        run: |
+          set -euo pipefail
+          BR="release-$(date +'%Y%m%d-%H%M%S')"
+
+          git config user.email "actions@github.com"
+          git config user.name  "actions-user"
+
+          git checkout -b "$BR"
+
+          # nuke submodule wiring and contents
+          rm -f .gitmodules || true
+          rm -rf calcom || true
+
+          # clone YOUR fork (or upstream) into calcom/
+          git clone --depth 1 https://github.com/jaycmedia/cal.com.git calcom
+          # or: git clone --depth 1 https://github.com/calcom/cal.com.git calcom
+
+          git add -A
+          git commit -m "Vendor calcom for Portainer deploy"
+          git push origin "$BR"
+
+      - name: Maybe trigger Portainer redeploy
+        if: ${{ github.event.inputs.trigger_portainer == 'true' }}
+        run: curl -fsSL -X POST "${{ secrets.PORTAINER_WEBHOOK_URL }}"
