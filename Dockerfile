@@ -33,12 +33,13 @@ ENV NEXT_PUBLIC_WEBAPP_URL=http://NEXT_PUBLIC_WEBAPP_URL_PLACEHOLDER \
     BUILD_STANDALONE=true \
     CSP_POLICY=$CSP_POLICY
 
-COPY calcom/package.json calcom/yarn.lock calcom/.yarnrc.yml calcom/playwright.config.ts calcom/turbo.json calcom/i18n.json ./
-COPY calcom/.yarn ./.yarn
-COPY calcom/apps/web ./apps/web
-COPY calcom/apps/api/v2 ./apps/api/v2
-COPY calcom/packages ./packages
-#COPY calcom/tests ./tests
+#COPY calcom/package.json calcom/yarn.lock calcom/.yarnrc.yml calcom/playwright.config.ts calcom/turbo.json calcom/i18n.json ./
+#COPY calcom/.yarn ./.yarn
+#COPY calcom/apps/web ./apps/web
+#COPY calcom/apps/api/v2 ./apps/api/v2
+#COPY calcom/packages ./packages
+##COPY calcom/tests ./tests
+COPY calcom/ ./
 
 RUN yarn config set httpTimeout 1200000
 RUN npm install -g turbo
@@ -60,13 +61,14 @@ ARG NEXT_PUBLIC_WEBAPP_URL=http://localhost:3000
 
 ENV NODE_ENV=production
 
-COPY calcom/package.json calcom/.yarnrc.yml calcom/turbo.json calcom/i18n.json ./
-COPY calcom/.yarn ./.yarn
-COPY --from=builder /calcom/yarn.lock ./yarn.lock
-COPY --from=builder /calcom/node_modules ./node_modules
-COPY --from=builder /calcom/packages ./packages
-COPY --from=builder /calcom/apps/web ./apps/web
-COPY --from=builder /calcom/packages/prisma/schema.prisma ./prisma/schema.prisma
+#COPY calcom/package.json calcom/.yarnrc.yml calcom/turbo.json calcom/i18n.json ./
+#COPY calcom/.yarn ./.yarn
+#COPY --from=builder /calcom/yarn.lock ./yarn.lock
+#COPY --from=builder /calcom/node_modules ./node_modules
+#COPY --from=builder /calcom/packages ./packages
+#COPY --from=builder /calcom/apps/web ./apps/web
+#COPY --from=builder /calcom/packages/prisma/schema.prisma ./prisma/schema.prisma
+COPY --from=builder /calcom ./
 COPY scripts scripts
 
 # Save value used during this build stage. If NEXT_PUBLIC_WEBAPP_URL and BUILT_NEXT_PUBLIC_WEBAPP_URL differ at
