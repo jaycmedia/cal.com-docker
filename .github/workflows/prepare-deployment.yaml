@@ -3,11 +3,6 @@ name: Prepare Deployment Branch
 on:
   workflow_dispatch:
     inputs:
-      branch_suffix:
-        description: 'Suffix for release branch'
-        required: false
-        default: ''
-
       trigger_portainer:
         description: 'POST to Portainer webhook? true/false'
         required: false
