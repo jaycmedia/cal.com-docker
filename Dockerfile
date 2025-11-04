@@ -38,7 +38,7 @@ COPY calcom/.yarn ./.yarn
 COPY calcom/apps/web ./apps/web
 COPY calcom/apps/api/v2 ./apps/api/v2
 COPY calcom/packages ./packages
-COPY calcom/tests ./tests
+#COPY calcom/tests ./tests
 
 RUN yarn config set httpTimeout 1200000
 RUN npm install -g turbo
